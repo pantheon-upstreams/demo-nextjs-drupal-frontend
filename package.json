@@ -1,0 +1,47 @@
+{
+  "name": "d11-next-js-blog",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "clear-cache": "node clear-cache.js",
+    "debug:preview": "node check-preview-env.js",
+    "setup": "node setup-diagnostic.js",
+    "debug:connection": "node debug-connection.js",
+    "test:drupal": "node diagnose-drupal.js",
+    "check:fields": "node check-article-fields.js",
+    "diagnose:all": "node complete-diagnostic.js",
+    "validate:fix": "node validate-fix.js"
+  },
+  "dependencies": {
+    "@mdx-js/loader": "^3.1.0",
+    "@next/mdx": "^16.2.7",
+    "@pantheon-systems/nextjs-cache-handler": "^0.7.0",
+    "@tailwindcss/typography": "^0.5.16",
+    "date-fns": "^3.6.0",
+    "gray-matter": "^4.0.3",
+    "next": "16.2.7",
+    "next-drupal": "^1.6.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "remark": "^15.0.1",
+    "remark-html": "^16.0.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.7",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,40 @@
+#!/bin/bash
+
+## Description: Initialize the Next.js front end (start, .env.local, dependencies, dev server)
+## Usage: init [--attach]
+## Example: "ddev init" or "ddev init --attach"
+
+set -e
+
+# By default the dev server is started in the background so init finishes cleanly and
+# prints the URL. Pass --attach to drop into the tmux session (live compile logs) instead.
+develop_flag="--background"
+for arg in "$@"; do
+  [ "$arg" = "--attach" ] && develop_flag=""
+done
+
+echo "Starting the Next.js front-end container..."
+ddev start
+
+# Seed .env.local from the example if it doesn't exist yet. The example already points
+# at the Drupal backend's DDEV host (https://d11-nextjs-be.ddev.site).
+if [ ! -f .env.local ] && [ -f .env.example ]; then
+  echo "Creating .env.local from .env.example..."
+  cp .env.example .env.local
+elif [ -f .env.local ]; then
+  echo ".env.local already exists, leaving it as-is."
+fi
+
+echo "Installing Node dependencies..."
+ddev npm install
+
+echo "Starting the Next.js dev server..."
+ddev develop ${develop_flag}
+
+if [ -n "${develop_flag}" ]; then
+  echo ""
+  echo "Front-end initialization complete!"
+  echo "  ${DDEV_PRIMARY_URL:-https://d11-nextjs-fe.ddev.site}"
+  echo ""
+  echo "Make sure the Drupal backend is running too: cd ../drupal && ddev init"
+fi

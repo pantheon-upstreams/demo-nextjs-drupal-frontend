@@ -1,0 +1,11 @@
+# Lets this Next.js DDEV project reach the separate Drupal backend (d11-nextjs-be) server-side.
+#
+# Maps the backend's router hostname to the host gateway, so server-side fetches from this
+# container to https://d11-nextjs-be.ddev.site go: container -> host -> ddev-router -> Drupal.
+# DDEV trusts the mkcert CA inside the web container, so HTTPS validates.
+#
+# If you rename the Drupal project, update the hostname here to match.
+services:
+  web:
+    extra_hosts:
+      - "d11-nextjs-be.ddev.site:host-gateway"

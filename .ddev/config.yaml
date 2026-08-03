@@ -1,0 +1,23 @@
+name: d11-nextjs-fe
+type: generic
+docroot: public
+webserver_type: nginx-fpm
+nodejs_version: "22"
+corepack_enable: true
+xdebug_enabled: false
+use_dns_when_possible: true
+webimage_extra_packages:
+    - tmux
+
+# Swap in the reverse-proxy config (primary URL -> Next.js dev server on :3000). DDEV
+# regenerates nginx_full/nginx-site.conf on every start, so we install ours via a hook.
+hooks:
+    post-start:
+        - exec: "sudo cp /mnt/ddev_config/nginx-proxy.conf /etc/nginx/sites-enabled/nginx-site.conf && sudo nginx -t && sudo nginx -s reload"
+
+# Decoupled front end — the standalone Next.js app for this starter.
+#
+# Served at the primary URL (https://d11-nextjs-fe.ddev.site) via the nginx reverse proxy in
+# .ddev/nginx-proxy.conf (proxied to the dev server on container port 3000; start it with
+# 'ddev develop'). Reads from the separate Drupal backend (DDEV project d11-nextjs-be); the
+# server-side route to that backend is set up in .ddev/docker-compose.backend.yaml.

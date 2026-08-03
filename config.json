@@ -1,0 +1,15 @@
+{
+  "site": {
+    "name": "NextJS on Pantheon",
+    "description": "A headless demo pairing Drupal 11 and Next.js 16 on Pantheon — content over JSON:API, deployed with WebOps.",
+    "heroImage": "/brand/hero.png"
+  },
+  "social": {
+    "x": "https://x.com/getpantheon",
+    "bluesky": "https://bsky.app/profile/pantheon.io",
+    "linkedin": "https://www.linkedin.com/company/getpantheon",
+    "youtube": "https://www.youtube.com/user/GetPantheon",
+    "facebook": "https://www.facebook.com/getpantheon",
+    "instagram": "https://www.instagram.com/getpantheon"
+  }
+}

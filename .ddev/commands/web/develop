@@ -1,0 +1,46 @@
+#!/bin/bash
+
+## Description: Run the Next.js dev server (tmux), proxied to the primary DDEV URL
+## Usage: develop [--background]
+## Example: "ddev develop" or "ddev develop --background"
+
+set -e
+
+attach_session=true
+for arg in "$@"; do
+  [ "$arg" = "--background" ] && attach_session=false
+done
+
+if ! command -v tmux &> /dev/null; then
+  echo "tmux not found. Add it via webimage_extra_packages and run 'ddev restart'."
+  exit 1
+fi
+
+# Per-project session name so this front end doesn't collide with others.
+SESSION="${DDEV_SITENAME:-nextjs}-dev"
+
+if tmux has-session -t "$SESSION" 2>/dev/null; then
+  echo "$SESSION already running."
+  if $attach_session; then
+    tmux attach-session -t "$SESSION"
+  else
+    echo "It will keep running in the background."
+  fi
+  exit 0
+fi
+
+if [ ! -d /var/www/html/node_modules ]; then
+  echo "Installing Node dependencies..."
+  (cd /var/www/html && npm install)
+fi
+
+tmux new-session -d -s "$SESSION" -n 'NextJS'
+# Bind the dev server to all interfaces so the nginx reverse proxy can reach it.
+tmux send-keys -t "$SESSION":0 'cd /var/www/html && npm run dev -- -H 0.0.0.0 -p 3000 2>&1 | tee /tmp/nextjs-dev.log' C-m
+
+if $attach_session; then
+  tmux attach-session -t "$SESSION"
+else
+  echo "Session '$SESSION' started in background."
+  echo "Front end will be available at ${DDEV_PRIMARY_URL} once it finishes compiling."
+fi
