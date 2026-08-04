@@ -687,16 +687,14 @@ export async function getPageFromDrupal(slugOrPath: string): Promise<Page | null
     // Add leading slash if not present
     const fullPath = slugOrPath.startsWith('/') ? slugOrPath : `/${slugOrPath}`;
     
-    // First try to find the path alias to get the node ID
+    // First try to find the path alias to get the node ID.
+    // Use drupalFetch (configured base URL + timeout) — never a hardcoded host, which
+    // would hang forever when there's nothing at that address (e.g. on Pantheon).
     try {
-      const aliasUrl = `http://localhost:8080/jsonapi/path_alias/path_alias?filter[alias]=${encodeURIComponent(fullPath)}`;
-      const aliasResponse = await fetch(aliasUrl, {
-        headers: {
-          'Accept': 'application/vnd.api+json',
-          'Content-Type': 'application/vnd.api+json',
-        },
-      });
-      
+      const aliasResponse = await drupalFetch(
+        `/jsonapi/path_alias/path_alias?filter[alias]=${encodeURIComponent(fullPath)}`
+      );
+
       if (aliasResponse.ok) {
         const aliasData = await aliasResponse.json();
         if (aliasData.data && aliasData.data.length > 0) {
