@@ -15,7 +15,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const tag = decodeURIComponent((await params).tag);
   return {
-    title: `${tag} - Tags - Will's Tech Blog`,
+    title: `${tag} - Tags - NextJS on Pantheon`,
     description: `Browse all content tagged with "${tag}" - posts and events.`,
   };
 }

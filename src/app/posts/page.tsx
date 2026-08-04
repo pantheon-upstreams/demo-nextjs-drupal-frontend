@@ -174,7 +174,7 @@ export default async function PostsPage() {
 
 export async function generateMetadata() {
   return {
-    title: 'Blog Posts | Will Hetherington',
+    title: 'Blog Posts | NextJS on Pantheon',
     description: 'Insights, tutorials, and thoughts on web development, Drupal, and technology.',
   };
 }

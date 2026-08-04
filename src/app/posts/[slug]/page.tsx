@@ -184,8 +184,8 @@ export async function generateMetadata({ params }: PostPageProps) {
   }
 
   return {
-    title: `${post.title} | Will Hetherington`,
-    description: post.excerpt || 'Blog post by Will Hetherington',
+    title: `${post.title} | NextJS on Pantheon`,
+    description: post.excerpt || 'An article on NextJS on Pantheon',
     openGraph: {
       title: post.title,
       description: post.excerpt,

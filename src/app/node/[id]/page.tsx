@@ -120,7 +120,7 @@ export async function generateMetadata({ params }: NodePageProps) {
     const page = transformDrupalPage(nodeData);
     
     return {
-      title: `${page.title} | Will Hetherington`,
+      title: `${page.title} | NextJS on Pantheon`,
       description: page.body?.replace(/<[^>]*>/g, '').substring(0, 160) || page.title,
     };
   } catch (error) {

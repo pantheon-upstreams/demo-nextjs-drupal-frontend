@@ -250,7 +250,7 @@ export async function generateMetadata({ params }: EventPageProps) {
   };
 
   return {
-    title: `${event.title} | Will Hetherington`,
+    title: `${event.title} | NextJS on Pantheon`,
     description: `${event.title} - ${formatLocationForMeta(event.location)}`,
     openGraph: {
       title: event.title,

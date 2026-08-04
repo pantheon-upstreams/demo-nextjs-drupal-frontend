@@ -7,7 +7,7 @@ import { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'All Tags - Will\'s Tech Blog',
+  title: 'All Tags - NextJS on Pantheon',
   description: 'Browse content by tags - discover posts and events organized by topics.',
 };
 
