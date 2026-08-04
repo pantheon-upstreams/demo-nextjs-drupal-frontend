@@ -2,6 +2,10 @@ import { getAllArticlesFromDrupal, getAllEventsFromDrupal } from '@/lib/drupal';
 import Link from 'next/link';
 import { Metadata } from 'next';
 
+// Render live per request so tag listings reflect current Drupal content (avoids a stale
+// or empty static prerender).
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'All Tags - Will\'s Tech Blog',
   description: 'Browse content by tags - discover posts and events organized by topics.',

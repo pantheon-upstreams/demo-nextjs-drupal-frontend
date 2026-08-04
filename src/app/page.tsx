@@ -6,6 +6,14 @@ import { formatDate } from '@/utils/date';
 import { TagList } from '@/components/TagList';
 import { DrupalDataFallback } from '@/components/DrupalErrorBoundary';
 
+// Render on every request (like /posts and /events) rather than statically at build
+// time. The homepage pulls all articles + events from Drupal; static prerendering bakes
+// whatever those fetches returned at build — and a single transient build-time fetch
+// failure (swallowed by safeDrupalCall into an empty list) would permanently leave the
+// article sections empty until the next rebuild. Dynamic rendering always reflects the
+// live backend and self-heals from any transient hiccup.
+export const dynamic = 'force-dynamic';
+
 // Helper function to format location object into readable string
 function formatLocation(location: any): string {
   if (!location) return 'Location TBD';

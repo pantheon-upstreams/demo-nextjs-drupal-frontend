@@ -3,6 +3,9 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import TagContent from '@/components/TagContent';
 
+// Render live per request so tag pages reflect current Drupal content.
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{
     tag: string;

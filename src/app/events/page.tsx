@@ -3,6 +3,11 @@ import { getAllEventsFromDrupal, Event } from '@/lib/drupal';
 import { formatDate } from '@/utils/date';
 import { ImageWithFallback } from '@/components/ImageWithFallback';
 
+// Render live per request (consistent with /posts and the event detail pages) so new
+// content appears immediately and a transient build-time fetch failure can't bake an
+// empty listing into a static page.
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'All Events',
   description: 'Browse upcoming and past events',
