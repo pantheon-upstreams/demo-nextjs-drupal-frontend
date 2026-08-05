@@ -36,5 +36,5 @@ if [ -n "${develop_flag}" ]; then
   echo "Front-end initialization complete!"
   echo "  ${DDEV_PRIMARY_URL:-https://d11-nextjs-fe.ddev.site}"
   echo ""
-  echo "Make sure the Drupal backend is running too: cd ../drupal && ddev init"
+  echo "Make sure the Drupal backend (d11-nextjs-be) is running too: run 'ddev init' in the backend repo."
 fi

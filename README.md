@@ -1,8 +1,12 @@
 # Next.js front end
 
-A Next.js 16 front end for the decoupled Drupal + Next.js starter. It renders content from the
-Drupal 11 backend in [`../drupal`](../drupal) over JSON:API, and is prepared to deploy as a
-**Pantheon Front-End Site**.
+A Next.js 16 front end for the decoupled Drupal + Next.js starter. It renders content over
+JSON:API from the Drupal 11 backend — a separate repository,
+[`willjackson/d11-nextjs-starter-be`](https://github.com/willjackson/d11-nextjs-starter-be) —
+and is prepared to deploy as a **Pantheon Front-End Site**.
+
+**Full setup, usage, and deploy:** see **[GUIDEBOOK.md](GUIDEBOOK.md)** (ships identically in
+the backend and front-end repos).
 
 ## Stack
 
@@ -14,16 +18,17 @@ Drupal 11 backend in [`../drupal`](../drupal) over JSON:API, and is prepared to 
 
 ## Prerequisites
 
-- The Drupal backend running as the `d11-nextjs-be` DDEV project (see [`../drupal`](../drupal)).
-  This front end reaches it over the shared DDEV router; server-side fetches are routed by
+- The Drupal backend running as the `d11-nextjs-be` DDEV project (its own repo). This front
+  end reaches it over the shared DDEV router; server-side fetches are routed by
   `.ddev/docker-compose.backend.yaml`.
 - DDEV, or Node 22+ to run it directly without DDEV.
 
 ## Environment variables
 
 Configure these per environment. Locally, copy `.env.example` to `.env.local` (`ddev init` does
-this for you); on Pantheon, set them as **Pantheon Secrets** (the Drupal installer's *Configure
-front end* step generates a ready-to-paste block).
+this for you); on Pantheon, set them as **Pantheon Secrets**
+(`terminus secret:site:set <fe-site> <KEY> "<value>" --type=env`) — the Drupal installer's
+*Configure front end* step also generates a ready-to-paste block.
 
 | Variable | Purpose |
 | --- | --- |
@@ -46,7 +51,7 @@ ddev develop-stop         # stop it
 ```
 
 The site is served at `https://d11-nextjs-fe.ddev.site` once it finishes compiling. Start the
-Drupal backend first (`cd ../drupal && ddev init`) — the front end fetches from it.
+Drupal backend first (`ddev init` in the backend repo) — the front end fetches from it.
 
 ## Run without DDEV
 
@@ -71,7 +76,9 @@ Content types: Pages (`/[...slug]` by path alias), Articles (`/posts/[slug]`), E
 
 ## Pantheon Front-End Sites
 
-This app is configured to deploy as a Pantheon Front-End Site:
+> **Front-End Sites is Pantheon's _legacy_ decoupled hosting** — see [Migrating from Front-End Sites](https://docs.pantheon.io/nextjs/migrating-from-front-end-sites) for the current **Next.js on Pantheon** offering.
+
+This app is configured for the Front-End Sites model:
 
 - **`output: 'standalone'`** in `next.config.ts` — the container build Pantheon runs.
 - **`cacheHandler.ts`** + `@pantheon-systems/nextjs-cache-handler` wire Pantheon's persistent
