@@ -27,7 +27,7 @@
     "date-fns": "^3.6.0",
     "gray-matter": "^4.0.3",
     "next": "16.2.7",
-    "next-drupal": "^1.6.0",
+    "next-drupal": "^2.0.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "remark": "^15.0.1",
@@ -43,5 +43,10 @@
     "eslint-config-next": "16.2.7",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "next-drupal": {
+      "next": "$next"
+    }
   }
 }

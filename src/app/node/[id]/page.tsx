@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { drupalFetch } from '@/lib/drupal-fetch';
+import { serverDrupalFetch } from '@/lib/drupal-server';
 import { transformDrupalPage, DrupalPageNode } from '@/lib/drupal';
 import { ImageWithFallback } from '@/components/ImageWithFallback';
 import '@/styles/drupal-content.css';
@@ -22,10 +22,10 @@ export default async function NodePage({ params }: NodePageProps) {
     
     let response;
     if (isUUID) {
-      response = await drupalFetch(`/jsonapi/node/page/${id}?include=field_image`);
+      response = await serverDrupalFetch(`/jsonapi/node/page/${id}?include=field_image`);
     } else {
       // Use filter for numeric node ID
-      response = await drupalFetch(`/jsonapi/node/page?filter[drupal_internal__nid]=${id}&include=field_image`);
+      response = await serverDrupalFetch(`/jsonapi/node/page?filter[drupal_internal__nid]=${id}&include=field_image`);
     }
     
     const jsonData = await response.json();
@@ -105,9 +105,9 @@ export async function generateMetadata({ params }: NodePageProps) {
     
     let response;
     if (isUUID) {
-      response = await drupalFetch(`/jsonapi/node/page/${id}`);
+      response = await serverDrupalFetch(`/jsonapi/node/page/${id}`);
     } else {
-      response = await drupalFetch(`/jsonapi/node/page?filter[drupal_internal__nid]=${id}`);
+      response = await serverDrupalFetch(`/jsonapi/node/page?filter[drupal_internal__nid]=${id}`);
     }
     
     const jsonData = await response.json();

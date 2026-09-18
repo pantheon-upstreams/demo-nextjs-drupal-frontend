@@ -3,6 +3,7 @@ import { Poppins, Aleo, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
+import { DraftModeBanner } from "@/components/DraftModeBanner";
 import { config } from "@/lib/config";
 
 // Pantheon brand fonts: Poppins (primary sans) + Aleo (serif accent).
@@ -45,6 +46,7 @@ export default function RootLayout({
           {children}
         </main>
         <Footer />
+        <DraftModeBanner />
       </body>
     </html>
   );
