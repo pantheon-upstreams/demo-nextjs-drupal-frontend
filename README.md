@@ -2,8 +2,8 @@
 
 A Next.js 16 front end for the decoupled Drupal + Next.js starter. It renders content over
 JSON:API from the Drupal 11 backend — a separate repository,
-[`willjackson/d11-nextjs-starter-be`](https://github.com/willjackson/d11-nextjs-starter-be) —
-and is prepared to deploy as a **Pantheon Front-End Site**.
+[`pantheon-upstreams/demo-nextjs-drupal-backend`](https://github.com/pantheon-upstreams/demo-nextjs-drupal-backend) —
+and deploys as a **Next.js site on Pantheon**.
 
 **Full setup, usage, and deploy:** see **[GUIDEBOOK.md](GUIDEBOOK.md)** (ships identically in
 the backend and front-end repos).
@@ -74,16 +74,21 @@ server runs at `http://localhost:3000`.
 Content types: Pages (`/[...slug]` by path alias), Articles (`/posts/[slug]`), Events
 (`/events/[slug]`), and Tags (`/tags`).
 
-## Pantheon Front-End Sites
+## Next.js on Pantheon
 
-> **Front-End Sites is Pantheon's _legacy_ decoupled hosting** — see [Migrating from Front-End Sites](https://docs.pantheon.io/nextjs/migrating-from-front-end-sites) for the current **Next.js on Pantheon** offering.
-
-This app is configured for the Front-End Sites model:
+This app is configured for [Next.js hosting on Pantheon](https://docs.pantheon.io/nextjs/overview):
 
 - **`output: 'standalone'`** in `next.config.ts` — the container build Pantheon runs.
 - **`cacheHandler.ts`** + `@pantheon-systems/nextjs-cache-handler` wire Pantheon's persistent
-  cache (auto-detects Google Cloud Storage on the platform, file cache locally).
+  cache (Google Cloud Storage on the platform, a file cache locally).
 - **`engines.node: 22.x`** in `package.json` pins the platform Node version.
 
-Point a Front-End Site at this repo, set the environment variables above as Pantheon Secrets, and
-build/deploy — `next build` produces the standalone server Pantheon serves with `next start`.
+Create a Next.js site pointed at this repository, set the environment variables above as
+Pantheon Secrets, and push — Pantheon builds on every push, and a pull request gets its own
+[Multidev environment](https://docs.pantheon.io/nextjs/multidev).
+
+Getting started end to end is covered in
+[Drupal + Next.js Quick Start](https://docs.pantheon.io/nextjs/drupal-quickstart).
+
+> Running on the older Front-End Sites offering? See
+> [Migrating from Front-End Sites](https://docs.pantheon.io/nextjs/migrating-from-front-end-sites).
