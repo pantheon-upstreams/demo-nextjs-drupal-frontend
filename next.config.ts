@@ -25,13 +25,13 @@ const drupalHost = drupalHostname();
 const drupalBaseUrl = process.env.NEXT_PUBLIC_DRUPAL_BASE_URL || 'http://localhost:8080';
 
 const nextConfig: NextConfig = {
-  // --- Next.js on Pantheon (Front-End Sites) ---
-  // Standalone container build + Pantheon's persistent cache handler (ISR /
-  // route-handler / fetch caching; in-memory cache disabled so the handler is
-  // authoritative). Only affects `next build`/`next start`, not `next dev`.
+  // Standalone container build + Pantheon's persistent cache handler (ISR,
+  // route handlers and the fetch cache; the in-memory cache is off so the
+  // handler is authoritative). Only affects `next build`/`next start`.
+  // The cache handler must not go in transpilePackages — that makes the edge
+  // compiler ignore its edge-safe entry and the build fails on `fs`.
   output: 'standalone',
-  transpilePackages: ['@pantheon-systems/nextjs-cache-handler'],
-  cacheHandler: path.resolve('./cacheHandler.ts'),
+  cacheHandler: path.resolve('./cache-handler.mjs'),
   cacheMaxMemorySize: 0,
 
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
