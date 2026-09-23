@@ -1,7 +1,7 @@
 import { draftMode } from 'next/headers';
 import { getDraftData } from 'next-drupal/draft';
 import { drupalFetch } from './drupal-fetch';
-import { getDrupalClient, hasDrupalCredentials } from './drupal-client';
+import { getDrupalClient, hasDrupalCredentials, resetDrupalClient } from './drupal-client';
 
 /**
  * Draft-aware JSON:API fetch for server components.
@@ -20,14 +20,32 @@ export async function serverDrupalFetch(
 
   const draftData = await getDraftData();
 
-  return drupalFetch(withResourceVersion(path, draftData.resourceVersion), {
-    ...options,
-    cache: 'no-store',
-    headers: {
-      ...options?.headers,
-      ...(await draftAuthHeader()),
-    },
-  });
+  return draftFetch(withResourceVersion(path, draftData.resourceVersion), options);
+}
+
+async function draftFetch(
+  path: string,
+  options?: RequestInit,
+  retry = true
+): Promise<Response> {
+  try {
+    return await drupalFetch(path, {
+      ...options,
+      cache: 'no-store',
+      headers: {
+        ...options?.headers,
+        ...(await draftAuthHeader()),
+      },
+    });
+  } catch (error) {
+    // Drupal rejects a cached token it no longer knows (database restored or
+    // cloned, token revoked) until the token expires. Retry once with a new one.
+    if (retry && /HTTP 40[13]/.test(String(error))) {
+      resetDrupalClient();
+      return draftFetch(path, options, false);
+    }
+    throw error;
+  }
 }
 
 // draftMode() throws outside a request scope, including in

@@ -35,3 +35,8 @@ export function getDrupalClient(): NextDrupal {
 
   return client;
 }
+
+// Discards the client and its cached access token.
+export function resetDrupalClient(): void {
+  client = undefined;
+}
