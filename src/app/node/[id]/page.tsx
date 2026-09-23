@@ -1,5 +1,5 @@
-import { notFound } from 'next/navigation';
-import { drupalFetch } from '@/lib/drupal-fetch';
+import { notFound, redirect } from 'next/navigation';
+import { serverDrupalFetch } from '@/lib/drupal-server';
 import { transformDrupalPage, DrupalPageNode } from '@/lib/drupal';
 import { ImageWithFallback } from '@/components/ImageWithFallback';
 import '@/styles/drupal-content.css';
@@ -12,8 +12,40 @@ interface NodePageProps {
 
 export const dynamic = 'force-dynamic';
 
+// Drupal links to /node/{id} when a node has no path alias, including in
+// preview links. This route renders pages; send articles and events to the
+// routes that render them.
+async function pathForNonPage(id: string): Promise<string | null> {
+  try {
+    const response = await serverDrupalFetch(
+      `/router/translate-path?path=${encodeURIComponent(`/node/${id}`)}`
+    );
+    const { entity, resolved } = await response.json();
+    const path = resolved ? new URL(resolved).pathname : '';
+    const alias = path && path !== `/node/${id}` ? path : null;
+
+    if (entity?.bundle === 'article') {
+      return alias ?? `/posts/article-${entity.uuid}`;
+    }
+    if (entity?.bundle === 'event') {
+      return alias ?? `/events/${entity.uuid}`;
+    }
+  } catch {
+    // Unknown path — fall through to the page lookup, which 404s.
+  }
+  return null;
+}
+
 export default async function NodePage({ params }: NodePageProps) {
   const { id } = await params;
+
+  if (/^\d+$/.test(id)) {
+    const target = await pathForNonPage(id);
+    if (target) {
+      redirect(target);
+    }
+  }
+
   let page;
   
   try {
@@ -22,10 +54,10 @@ export default async function NodePage({ params }: NodePageProps) {
     
     let response;
     if (isUUID) {
-      response = await drupalFetch(`/jsonapi/node/page/${id}?include=field_image`);
+      response = await serverDrupalFetch(`/jsonapi/node/page/${id}?include=field_image`);
     } else {
       // Use filter for numeric node ID
-      response = await drupalFetch(`/jsonapi/node/page?filter[drupal_internal__nid]=${id}&include=field_image`);
+      response = await serverDrupalFetch(`/jsonapi/node/page?filter[drupal_internal__nid]=${id}&include=field_image`);
     }
     
     const jsonData = await response.json();
@@ -105,9 +137,9 @@ export async function generateMetadata({ params }: NodePageProps) {
     
     let response;
     if (isUUID) {
-      response = await drupalFetch(`/jsonapi/node/page/${id}`);
+      response = await serverDrupalFetch(`/jsonapi/node/page/${id}`);
     } else {
-      response = await drupalFetch(`/jsonapi/node/page?filter[drupal_internal__nid]=${id}`);
+      response = await serverDrupalFetch(`/jsonapi/node/page?filter[drupal_internal__nid]=${id}`);
     }
     
     const jsonData = await response.json();
