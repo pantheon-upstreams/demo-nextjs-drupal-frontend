@@ -10,14 +10,15 @@ npm install dominate).
 
 **End state:** a Drupal backend and a Next.js frontend running as two local DDEV projects,
 the frontend rendering live Drupal content — and a clear path to deploy each to Pantheon
-(the backend as a **Custom Upstream**, the frontend as a **Front-End Site**).
+(the backend as a **Custom Upstream**, the frontend as a **Next.js site**).
 
 > This guidebook ships **identically in both repositories** (backend and frontend), so it
 > reads the same whichever you cloned. Commands are shown **relative to a repository's
 > root** — each repo is a standalone app; there is no shared parent folder when cloned.
 
 New to Next.js on Pantheon? The [Next.js Overview](https://docs.pantheon.io/nextjs) covers the
-platform (and [Migrating from Front-End Sites](https://docs.pantheon.io/nextjs/migrating-from-front-end-sites)
+platform and [Drupal + Next.js Quick Start](https://docs.pantheon.io/nextjs/drupal-quickstart) covers
+this pairing (see [Migrating from Front-End Sites](https://docs.pantheon.io/nextjs/migrating-from-front-end-sites)
 if you're on the legacy offering); this guidebook covers standing up *this* Drupal-backed starter.
 
 ---
@@ -29,7 +30,7 @@ if you're on the legacy offering); this guidebook covers standing up *this* Drup
 | You need | Notes |
 |---|---|
 | Pantheon Dashboard access | The workspace/organization your sites and custom upstream belong to |
-| GitHub account or organization | Both repos live on GitHub; the frontend (a Front-End Site) deploys **from** GitHub, and the backend is registered as a Custom Upstream from its GitHub repo |
+| GitHub account or organization | Both repos live on GitHub; the frontend deploys **from** GitHub, and the backend is registered as a Custom Upstream from its GitHub repo |
 
 ### Tools
 
@@ -69,14 +70,14 @@ versioned and deployable, each with its own DDEV project. Clone whichever you ne
 creates a directory named after the repo:
 
 ```bash
-git clone git@github.com:willjackson/d11-nextjs-starter-be.git   # → d11-nextjs-starter-be/  (Drupal backend)
-git clone git@github.com:willjackson/d11-nextjs-starter-fe.git   # → d11-nextjs-starter-fe/  (Next.js frontend)
+git clone git@github.com:pantheon-upstreams/demo-nextjs-drupal-backend.git   # → demo-nextjs-drupal-backend/  (Drupal backend)
+git clone git@github.com:pantheon-upstreams/demo-nextjs-drupal-frontend.git   # → demo-nextjs-drupal-frontend/  (Next.js frontend)
 ```
 
 | Part | Repository | DDEV project | Local URL |
 | --- | --- | --- | --- |
-| Drupal 11 backend | [`willjackson/d11-nextjs-starter-be`](https://github.com/willjackson/d11-nextjs-starter-be) | `d11-nextjs-be` | https://d11-nextjs-be.ddev.site |
-| Next.js 16 frontend | [`willjackson/d11-nextjs-starter-fe`](https://github.com/willjackson/d11-nextjs-starter-fe) | `d11-nextjs-fe` | https://d11-nextjs-fe.ddev.site |
+| Drupal 11 backend | [`pantheon-upstreams/demo-nextjs-drupal-backend`](https://github.com/pantheon-upstreams/demo-nextjs-drupal-backend) | `d11-nextjs-be` | https://d11-nextjs-be.ddev.site |
+| Next.js 16 frontend | [`pantheon-upstreams/demo-nextjs-drupal-frontend`](https://github.com/pantheon-upstreams/demo-nextjs-drupal-frontend) | `d11-nextjs-fe` | https://d11-nextjs-fe.ddev.site |
 
 Clone each repository wherever you like — they do **not** need to be in sibling folders.
 When both DDEV projects are running, the frontend reaches the backend over the shared,
@@ -102,8 +103,8 @@ with **OAuth** for draft preview; when content changes, Drupal calls the fronten
 The **WordPress-backed** counterpart uses the same Next.js patterns with WordPress + the WP
 REST API instead of Drupal + JSON:API:
 
-- [`willjackson/wp-nextjs-starter-be`](https://github.com/willjackson/wp-nextjs-starter-be) — WordPress on Pantheon.
-- [`willjackson/wp-nextjs-starter-fe`](https://github.com/willjackson/wp-nextjs-starter-fe) — headless WordPress + Next.js 16.
+- [`pantheon-upstreams/demo-nextjs-wordpress-backend`](https://github.com/pantheon-upstreams/demo-nextjs-wordpress-backend) — WordPress on Pantheon.
+- [`pantheon-upstreams/demo-nextjs-wordpress-frontend`](https://github.com/pantheon-upstreams/demo-nextjs-wordpress-frontend) — headless WordPress + Next.js 16.
 
 ---
 
@@ -255,7 +256,7 @@ Fine for frontend-only work, but **you own the wiring** DDEV otherwise handles:
 Copy `.env.example` → `.env.local` (`ddev init` does this). Both live at the frontend repo
 root. On Pantheon, set these as **Pantheon Secrets** — see
 [environment variables for Next.js](https://docs.pantheon.io/nextjs/environment-variables)
-and [Manage Settings](https://docs.pantheon.io/guides/decoupled/overview/manage-settings).
+and [Manage Settings](https://docs.pantheon.io/nextjs/environment-variables).
 
 | Variable | Purpose |
 | --- | --- |
@@ -265,7 +266,7 @@ and [Manage Settings](https://docs.pantheon.io/guides/decoupled/overview/manage-
 | `DRUPAL_REVALIDATE_SECRET` | On-demand revalidation secret; matches the Drupal `next_site`. |
 | `DRUPAL_PREVIEW_SECRET` | Draft-mode secret; matches the `next_site` preview secret. |
 
-**Setting them on Pantheon (Secrets Manager via Terminus).** Front-End Site env vars are
+**Setting them on Pantheon (Secrets Manager via Terminus).** Next.js site env vars are
 stored as Pantheon Secrets of `--type=env` (Secrets Manager is built into Terminus 4.2+).
 Target `<fe-site>` for **all environments**, or `<fe-site>.<env>` to override one; `--rebuild`
 triggers a redeploy so the Node app picks up the change. Use the exact values shown by the
@@ -302,7 +303,8 @@ terminus secret:site:delete <fe-site> DRUPAL_PREVIEW_SECRET
    their aliases (e.g. `/about`). Navigation comes from the `nextjs` menu.
 4. **Draft preview** and **on-demand revalidation** flow through the `next` module using the
    OAuth consumer and the revalidate/preview secrets — see
-   [Configure Content Preview](https://docs.pantheon.io/guides/decoupled/drupal-nextjs-frontend-starters/content-preview).
+   [Drupal draft preview](https://docs.pantheon.io/nextjs/drupal-preview-tutorial) and
+   [Drupal cache revalidation](https://docs.pantheon.io/nextjs/drupal-revalidation-tutorial).
 
 ---
 
@@ -357,13 +359,13 @@ plus a **Front end URL** field (optional — you can set it later).
 > The `DRUPAL_CLIENT_SECRET` is generated during install and **displayed only on this
 > screen** — it's hashed once stored on the OAuth consumer, so copy the block now.
 
-Which path you take depends on whether the Front-End Site already exists:
+Which path you take depends on whether the Next.js site already exists:
 
-- **Front-End Site already created (you know its URL):** enter that URL in the *Front end
+- **Next.js site already created (you know its URL):** enter that URL in the *Front end
   URL* field and set the copied variables as the site's **Pantheon Secrets**. The frontend is
   fully wired from its first build.
-- **Front-End Site not created yet:** copy the `.env` block now (the secret won't be shown
-  again) and finish the install; then create the Front-End Site and add these values as its
+- **Next.js site not created yet:** copy the `.env` block now (the secret won't be shown
+  again) and finish the install; then create the Next.js site and add these values as its
   **Pantheon Secrets**. Point Drupal at the frontend afterward under **Configuration → Web
   services → Next.js** (the `next_site` base / preview / revalidate URLs) — the installer
   links you there when you leave the URL blank.
@@ -377,12 +379,12 @@ updating the matching Pantheon Secret.
 > `nextjs-drupal`, matching `.env.example`). The `.env` step above is specific to the
 > Dashboard/UI install.
 
-### Frontend — Front-End Site (Git deploy)
+### Frontend — Next.js site (Git deploy)
 
-The frontend deploys as a Pantheon **Front-End Site** — **Git-based, not** `upstream:updates`.
+The frontend deploys as a Pantheon **Next.js site** — **Git-based, not** `upstream:updates`.
 Pantheon builds automatically when you push to the connected repository
 ([Migrating from Front-End Sites](https://docs.pantheon.io/nextjs/migrating-from-front-end-sites),
-[Build details](https://docs.pantheon.io/guides/decoupled/no-starter-kit/build-details)):
+[Build details](https://docs.pantheon.io/nextjs/architecture)):
 
 ```bash
 # From the frontend repo root:
@@ -391,7 +393,7 @@ git checkout -b my-change && git push origin my-change # → open a PR → Multi
 ```
 
 - Push `main` → builds & deploys to **Dev**; a feature branch / PR → a **Multidev** preview
-  environment ([FES Multidev](https://docs.pantheon.io/guides/decoupled/overview/fes-multidev)).
+  environment ([FES Multidev](https://docs.pantheon.io/nextjs/multidev)).
 - Watch the build (Site Dashboard → Overview → **Live Build**), then promote **Dev → Test →
   Live** ([Test and Live for Next.js](https://docs.pantheon.io/nextjs/test-and-live-env)).
 - Production runs the **standalone** build with the persistent
@@ -406,7 +408,7 @@ git checkout -b my-change && git push origin my-change # → open a PR → Multi
 Local dev mirrors production — separate DDEV projects, started independently, coexisting on
 the shared `ddev-router`. Each repo carries its own `.ddev/` config at its root.
 
-| | Backend (`d11-nextjs-starter-be`) | Frontend (`d11-nextjs-starter-fe`) |
+| | Backend (`demo-nextjs-drupal-backend`) | Frontend (`demo-nextjs-drupal-frontend`) |
 | --- | --- | --- |
 | DDEV `type` | `drupal11` | `generic` (Node 22) |
 | Serves | Drupal via PHP-FPM/nginx | Next.js dev server on `:3000`, reverse-proxied |
@@ -415,7 +417,7 @@ the shared `ddev-router`. Each repo carries its own `.ddev/` config at its root.
 
 ## Command reference
 
-**Backend** (run in the `d11-nextjs-starter-be` repo)
+**Backend** (run in the `demo-nextjs-drupal-backend` repo)
 
 | Task | Command |
 | --- | --- |
@@ -425,7 +427,7 @@ the shared `ddev-router`. Each repo carries its own `.ddev/` config at its root.
 | URLs + admin login + front ends | `ddev show-links` |
 | Drush / Composer | `ddev drush <cmd>` / `ddev composer <cmd>` |
 
-**Frontend** (run in the `d11-nextjs-starter-fe` repo)
+**Frontend** (run in the `demo-nextjs-drupal-frontend` repo)
 
 | Task | Command |
 | --- | --- |
@@ -445,7 +447,7 @@ the shared `ddev-router`. Each repo carries its own `.ddev/` config at its root.
   route — run the frontend under DDEV (§4, Option A) or point env vars at a public URL.
 - **`ddev` project name conflict:** DDEV names are unique per machine; if `d11-nextjs-be` /
   `d11-nextjs-fe` collide, rename in that repo's `.ddev/config.yaml`.
-- **Pantheon frontend build didn't pick up my change:** Front-End Sites deploy on **git
+- **Pantheon frontend build didn't pick up my change:** Next.js sites deploy on **git
   push** — confirm you pushed the branch mapped to the target environment (not
   `terminus upstream:updates`, which is backend-only).
 - **`curl` of a dev site returns a "sandbox" page:** dev environments show an interstitial;
@@ -460,8 +462,10 @@ the shared `ddev-router`. Each repo carries its own `.ddev/` config at its root.
 
 **Frontend / Next.js on Pantheon**
 - [Next.js Overview](https://docs.pantheon.io/nextjs) · [Build & Runtime Architecture](https://docs.pantheon.io/nextjs/architecture) · [Migrating from Front-End Sites](https://docs.pantheon.io/nextjs/migrating-from-front-end-sites)
-- [Environment variables](https://docs.pantheon.io/nextjs/environment-variables) · [Manage Settings](https://docs.pantheon.io/guides/decoupled/overview/manage-settings) · [Multidev](https://docs.pantheon.io/guides/decoupled/overview/fes-multidev) · [Test & Live](https://docs.pantheon.io/nextjs/test-and-live-env)
-- [Configure Content Preview (Drupal + Next.js)](https://docs.pantheon.io/guides/decoupled/drupal-nextjs-frontend-starters/content-preview) · [Troubleshooting](https://docs.pantheon.io/guides/decoupled/overview/troubleshooting)
+- [Environment variables](https://docs.pantheon.io/nextjs/environment-variables) · [Multidev](https://docs.pantheon.io/nextjs/multidev) · [Test & Live](https://docs.pantheon.io/nextjs/test-and-live-env) · [Considerations](https://docs.pantheon.io/nextjs/considerations)
+
+**Drupal + Next.js**
+- [Quick Start](https://docs.pantheon.io/nextjs/drupal-quickstart) · [Cache revalidation](https://docs.pantheon.io/nextjs/drupal-revalidation-tutorial) · [Draft preview](https://docs.pantheon.io/nextjs/drupal-preview-tutorial)
 
 **Platform**
 - [WebOps Workflow](https://docs.pantheon.io/pantheon-workflow) · [Git on Pantheon](https://docs.pantheon.io/guides/git) · [DDEV](https://ddev.com/)
