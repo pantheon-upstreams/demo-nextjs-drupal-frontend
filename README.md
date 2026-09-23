@@ -37,7 +37,7 @@ this for you); on Pantheon, set them as **Pantheon Secrets**
 | `DRUPAL_CLIENT_ID` | Simple OAuth consumer client id — typically `default_consumer`. |
 | `DRUPAL_CLIENT_SECRET` | Consumer secret used for authenticated calls / draft preview. **Secret** — store in Pantheon Secrets. |
 | `DRUPAL_REVALIDATE_SECRET` | Shared secret for on-demand revalidation; must match the Drupal `next_site`. **Secret.** |
-| `DRUPAL_PREVIEW_SECRET` | Shared secret for draft mode; must match the Drupal `next_site` preview secret. **Secret.** |
+| `DRUPAL_PREVIEW_SECRET` | Not read by the front end — Drupal signs and validates preview links itself. The installer still prints it. |
 
 Site name, description, and social links come from `config.json`, bundled at build time.
 
@@ -76,10 +76,10 @@ Content types: Pages (`/[...slug]` by path alias), Articles (`/posts/[slug]`), E
 
 ## Next.js on Pantheon
 
-This app is configured for [Next.js hosting on Pantheon](https://docs.pantheon.io/nextjs/overview):
+This app is configured for [Next.js hosting on Pantheon](https://docs.pantheon.io/nextjs):
 
 - **`output: 'standalone'`** in `next.config.ts` — the container build Pantheon runs.
-- **`cacheHandler.ts`** + `@pantheon-systems/nextjs-cache-handler` wire Pantheon's persistent
+- **`cache-handler.mjs`** + `@pantheon-systems/nextjs-cache-handler` wire Pantheon's persistent
   cache (Google Cloud Storage on the platform, a file cache locally).
 - **`engines.node: 22.x`** in `package.json` pins the platform Node version.
 

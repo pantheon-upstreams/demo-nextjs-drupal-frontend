@@ -129,7 +129,7 @@ The content model and demo content ship as two Composer packages under the
 
 | Recipe | Type | Provides |
 | --- | --- | --- |
-| `pantheon-systems-ps/pantheon_nextjs_demo` | Site | JSON:API, OAuth, `next`/`decoupled_router`/`consumers`/`simple_oauth`/`pathauto`, the Page/Article/Event content types, the `nextjs` menu, and the `next_site` connection (takes a `base_url` input). |
+| `pantheon-systems-ps/pantheon_nextjs_demo` | Site | JSON:API, OAuth, `next`/`decoupled_router`/`consumers`/`simple_oauth`/`pathauto`, the Page/Article/Event content types, the `nextjs` menu, the `next_site` connection (takes a `base_url` input), preview and cache-tag revalidation for each content type, and the `nextjs_preview` role and OAuth scope. |
 | `pantheon-systems-ps/pantheon_nextjs_demo_content` | Content | Demo content — Articles, Events, Pages, Tags, images, menu links. Depends on and auto-applies the Site recipe. |
 
 ```bash
@@ -264,7 +264,7 @@ and [Manage Settings](https://docs.pantheon.io/nextjs/environment-variables).
 | `NEXT_IMAGE_DOMAIN` | Drupal host allowed for `next/image` (host only). |
 | `DRUPAL_CLIENT_ID` / `DRUPAL_CLIENT_SECRET` | Simple OAuth consumer (defaults `default_consumer` / `nextjs-drupal`). |
 | `DRUPAL_REVALIDATE_SECRET` | On-demand revalidation secret; matches the Drupal `next_site`. |
-| `DRUPAL_PREVIEW_SECRET` | Draft-mode secret; matches the `next_site` preview secret. |
+| `DRUPAL_PREVIEW_SECRET` | Not read by the front end — Drupal signs and validates preview links itself. |
 
 **Setting them on Pantheon (Secrets Manager via Terminus).** Next.js site env vars are
 stored as Pantheon Secrets of `--type=env` (Secrets Manager is built into Terminus 4.2+).
@@ -278,15 +278,14 @@ terminus secret:site:set <fe-site> NEXT_PUBLIC_DRUPAL_BASE_URL "https://<backend
 terminus secret:site:set <fe-site> NEXT_IMAGE_DOMAIN           "<backend>.pantheonsite.io"          --type=env
 terminus secret:site:set <fe-site> DRUPAL_CLIENT_ID            "default_consumer"                   --type=env
 terminus secret:site:set <fe-site> DRUPAL_CLIENT_SECRET        "<one-time-secret>"                  --type=env
-terminus secret:site:set <fe-site> DRUPAL_REVALIDATE_SECRET    "nextjs-drupal"                      --type=env
-terminus secret:site:set <fe-site> DRUPAL_PREVIEW_SECRET       "nextjs-drupal"                      --type=env --rebuild
+terminus secret:site:set <fe-site> DRUPAL_REVALIDATE_SECRET    "nextjs-drupal"                      --type=env --rebuild
 
 # Override a single environment (e.g. a Multidev branch env)
 terminus secret:site:set <fe-site>.<env> NEXT_PUBLIC_DRUPAL_BASE_URL "https://<env>-<backend>.pantheonsite.io" --type=env --rebuild
 
 # Inspect / remove
 terminus secret:site:list   <fe-site>
-terminus secret:site:delete <fe-site> DRUPAL_PREVIEW_SECRET
+terminus secret:site:delete <fe-site> DRUPAL_REVALIDATE_SECRET
 ```
 
 > `--scope` (`ic`, `user`, `web`) can further restrict a secret; the default is fine for
@@ -302,7 +301,7 @@ terminus secret:site:delete <fe-site> DRUPAL_PREVIEW_SECRET
 3. The Next.js frontend renders it: home page, `/posts`, `/events`, `/tags`, and Pages at
    their aliases (e.g. `/about`). Navigation comes from the `nextjs` menu.
 4. **Draft preview** and **on-demand revalidation** flow through the `next` module using the
-   OAuth consumer and the revalidate/preview secrets — see
+   OAuth consumer and the revalidate secret — see
    [Drupal draft preview](https://docs.pantheon.io/nextjs/drupal-preview-tutorial) and
    [Drupal cache revalidation](https://docs.pantheon.io/nextjs/drupal-revalidation-tutorial).
 
