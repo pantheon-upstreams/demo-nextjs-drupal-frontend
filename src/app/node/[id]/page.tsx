@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { serverDrupalFetch } from '@/lib/drupal-server';
 import { transformDrupalPage, DrupalPageNode } from '@/lib/drupal';
 import { ImageWithFallback } from '@/components/ImageWithFallback';
@@ -12,8 +12,40 @@ interface NodePageProps {
 
 export const dynamic = 'force-dynamic';
 
+// Drupal links to /node/{id} when a node has no path alias, including in
+// preview links. This route renders pages; send articles and events to the
+// routes that render them.
+async function pathForNonPage(id: string): Promise<string | null> {
+  try {
+    const response = await serverDrupalFetch(
+      `/router/translate-path?path=${encodeURIComponent(`/node/${id}`)}`
+    );
+    const { entity, resolved } = await response.json();
+    const path = resolved ? new URL(resolved).pathname : '';
+    const alias = path && path !== `/node/${id}` ? path : null;
+
+    if (entity?.bundle === 'article') {
+      return alias ?? `/posts/article-${entity.uuid}`;
+    }
+    if (entity?.bundle === 'event') {
+      return alias ?? `/events/${entity.uuid}`;
+    }
+  } catch {
+    // Unknown path — fall through to the page lookup, which 404s.
+  }
+  return null;
+}
+
 export default async function NodePage({ params }: NodePageProps) {
   const { id } = await params;
+
+  if (/^\d+$/.test(id)) {
+    const target = await pathForNonPage(id);
+    if (target) {
+      redirect(target);
+    }
+  }
+
   let page;
   
   try {
