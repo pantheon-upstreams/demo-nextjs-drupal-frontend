@@ -22,7 +22,7 @@
   "dependencies": {
     "@mdx-js/loader": "^3.1.0",
     "@next/mdx": "^16.2.7",
-    "@pantheon-systems/nextjs-cache-handler": "^0.7.0",
+    "@pantheon-systems/nextjs-cache-handler": "^0.11.0",
     "@tailwindcss/typography": "^0.5.16",
     "date-fns": "^3.6.0",
     "gray-matter": "^4.0.3",

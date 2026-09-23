@@ -1,5 +1,18 @@
 import { serverDrupalFetch } from './drupal-server';
 
+/**
+ * Cache tags for a node bundle, matching what Drupal's Cache Tag revalidator
+ * sends when content changes (`node_list`, `node_list:<bundle>`).
+ */
+function nodeListTags(bundle: string): RequestInit {
+  return {
+    // force-cache is required for the tags to mean anything: without it Next 16
+    // does not cache the response, so there is nothing for revalidateTag to clear.
+    cache: 'force-cache',
+    next: { tags: ['node_list', `node_list:${bundle}`] },
+  };
+}
+
 // JSON:API Single Event response interface
 export interface DrupalSingleEventResponse {
   jsonapi: {
@@ -528,7 +541,7 @@ export async function getAllEventsFromDrupal(): Promise<Event[]> {
   try {
     const path = '/jsonapi/node/event?sort=-field_event_date&include=field_event_hero';
     
-    const response = await serverDrupalFetch(path);
+    const response = await serverDrupalFetch(path, nodeListTags('event'));
     const jsonData: DrupalEventResponse = await response.json();
     
     if (!jsonData.data || !Array.isArray(jsonData.data)) {
@@ -549,7 +562,7 @@ export async function getEventFromDrupal(idOrSlug: string): Promise<Event | null
     
     if (isUUID) {
       const path = `/jsonapi/node/event/${idOrSlug}?include=field_event_hero`;
-      const response = await serverDrupalFetch(path);
+      const response = await serverDrupalFetch(path, nodeListTags('event'));
       const jsonData: DrupalSingleEventResponse = await response.json();
       
       if (!jsonData.data) {
@@ -560,7 +573,7 @@ export async function getEventFromDrupal(idOrSlug: string): Promise<Event | null
     } else {
       const slugPath = `/events/${idOrSlug}`;
       const path = `/jsonapi/node/event?filter[path.alias]=${encodeURIComponent(slugPath)}&include=field_event_hero`;
-      const response = await serverDrupalFetch(path);
+      const response = await serverDrupalFetch(path, nodeListTags('event'));
       const jsonData: DrupalEventResponse = await response.json();
       
       if (!jsonData.data || jsonData.data.length === 0) {
@@ -580,7 +593,7 @@ export async function getAllArticlesFromDrupal(): Promise<Article[]> {
   try {
     const path = '/jsonapi/node/article?sort=-created&include=field_image,field_tags';
     
-    const response = await serverDrupalFetch(path);
+    const response = await serverDrupalFetch(path, nodeListTags('article'));
     const jsonData: DrupalArticleResponse = await response.json();
     
     if (!jsonData.data || !Array.isArray(jsonData.data)) {
@@ -601,7 +614,7 @@ export async function getArticleFromDrupal(idOrSlug: string): Promise<Article | 
     
     if (isUUID) {
       const path = `/jsonapi/node/article/${idOrSlug}?include=field_image,field_tags`;
-      const response = await serverDrupalFetch(path);
+      const response = await serverDrupalFetch(path, nodeListTags('article'));
       const jsonData: DrupalSingleArticleResponse = await response.json();
       
       if (!jsonData.data) {
@@ -613,7 +626,7 @@ export async function getArticleFromDrupal(idOrSlug: string): Promise<Article | 
       if (idOrSlug.startsWith('article-')) {
         const nodeId = idOrSlug.replace('article-', '');
         const path = `/jsonapi/node/article/${nodeId}?include=field_image,field_tags`;
-        const response = await serverDrupalFetch(path);
+        const response = await serverDrupalFetch(path, nodeListTags('article'));
         const jsonData: DrupalSingleArticleResponse = await response.json();
         
         if (!jsonData.data) {
@@ -624,7 +637,7 @@ export async function getArticleFromDrupal(idOrSlug: string): Promise<Article | 
       } else {
         const slugPath = `/posts/${idOrSlug}`;
         const path = `/jsonapi/node/article?filter[path.alias]=${encodeURIComponent(slugPath)}&include=field_image,field_tags`;
-        const response = await serverDrupalFetch(path);
+        const response = await serverDrupalFetch(path, nodeListTags('article'));
         const jsonData: DrupalArticleResponse = await response.json();
         
         if (!jsonData.data || jsonData.data.length === 0) {
@@ -645,7 +658,7 @@ export async function getFeaturedArticlesFromDrupal(): Promise<Article[]> {
   try {
     const path = '/jsonapi/node/article?filter[promote]=1&sort=-created&include=field_image,field_tags';
     
-    const response = await serverDrupalFetch(path);
+    const response = await serverDrupalFetch(path, nodeListTags('article'));
     const jsonData: DrupalArticleResponse = await response.json();
     
     if (!jsonData.data || !Array.isArray(jsonData.data)) {
@@ -664,7 +677,7 @@ export async function getAllPagesFromDrupal(): Promise<Page[]> {
   try {
     const path = '/jsonapi/node/page?sort=-created&include=field_image';
     
-    const response = await serverDrupalFetch(path);
+    const response = await serverDrupalFetch(path, nodeListTags('page'));
     const jsonData = await response.json();
     
     if (!jsonData.data || !Array.isArray(jsonData.data)) {
@@ -692,7 +705,9 @@ export async function getPageFromDrupal(slugOrPath: string): Promise<Page | null
     // would hang forever when there's nothing at that address (e.g. on Pantheon).
     try {
       const aliasResponse = await serverDrupalFetch(
-        `/jsonapi/path_alias/path_alias?filter[alias]=${encodeURIComponent(fullPath)}`
+        `/jsonapi/path_alias/path_alias?filter[alias]=${encodeURIComponent(fullPath)}`,
+        // Aliases change when content does, so refresh with any node change.
+        { cache: 'force-cache', next: { tags: ['node_list'] } }
       );
 
       if (aliasResponse.ok) {
@@ -704,7 +719,7 @@ export async function getPageFromDrupal(slugOrPath: string): Promise<Page | null
           if (nodeIdMatch) {
             const nodeId = nodeIdMatch[1];
             const nodePath = `/jsonapi/node/page/${nodeId}?include=field_image`;
-            const nodeResponse = await serverDrupalFetch(nodePath);
+            const nodeResponse = await serverDrupalFetch(nodePath, nodeListTags('page'));
             const nodeData = await nodeResponse.json();
             
             if (nodeData.data) {
@@ -722,7 +737,7 @@ export async function getPageFromDrupal(slugOrPath: string): Promise<Page | null
     // Fallback: try to find by slug in the path field (if it exists)
     // This might work for simple single-level paths
     const path = `/jsonapi/node/page?include=field_image`;
-    const response = await serverDrupalFetch(path);
+    const response = await serverDrupalFetch(path, nodeListTags('page'));
     const jsonData = await response.json();
     
     if (jsonData.data && Array.isArray(jsonData.data)) {
@@ -749,7 +764,7 @@ export async function getStickyArticlesFromDrupal(): Promise<Article[]> {
   try {
     const path = '/jsonapi/node/article?filter[sticky]=1&sort=-created&include=field_image,field_tags';
     
-    const response = await serverDrupalFetch(path);
+    const response = await serverDrupalFetch(path, nodeListTags('article'));
     const jsonData: DrupalArticleResponse = await response.json();
     
     if (!jsonData.data || !Array.isArray(jsonData.data)) {
